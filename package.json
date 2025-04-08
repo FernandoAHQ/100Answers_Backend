@@ -30,6 +30,7 @@
     "class-validator": "^0.14.1",
     "cors": "^2.8.5",
     "mongoose": "^8.13.2",
+    "react-icons": "^5.5.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1"
