@@ -27,7 +27,7 @@ export class SocketService {
       console.log(`New game requested by client: ${clientId}`);
       console.log(payload);
 
-      const session = this.gameService.createSession(clientId, payload);
+      const session = this.gameService.createSession(payload);
       socket.join(`${session.id}_HOST`);
       console.log(session.teams.values);
 

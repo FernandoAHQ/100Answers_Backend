@@ -30,10 +30,10 @@ export class GameSession {
   totalRounds: number = 5;
 
   constructor(
-    hostId: string,
+    sessionId: string,
     { team1, team2, teamSize, randomTeam }: NewGameConfig,
   ) {
-    this.id = 'TEST SESSION';
+    this.id = sessionId;
     this.teams
       .set(team1, {
         players: new Map<string, string>(),
@@ -47,6 +47,5 @@ export class GameSession {
     this.randomTeam = randomTeam;
     this.currentTeam = team1;
     console.log('NEW GAME SESSION CREATED', this.id);
-    console.log('GAME HOST', hostId);
   }
 }
