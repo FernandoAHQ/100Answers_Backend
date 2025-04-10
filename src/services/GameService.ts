@@ -7,6 +7,36 @@ export class GameService {
   private sessions = new Map<string, GameSession>();
   private gameCodes = new Set<string>();
 
+  verifyCode(id: string): {
+    isValid: boolean;
+    availableTeams: string[] | null;
+  } {
+    const session = this.sessions.get(id);
+    let availableTeams = null;
+    let isValid = false;
+
+    if (session) {
+      availableTeams = !session.randomTeam
+        ? this.getAvailableTeams(session)
+        : null;
+      isValid = true;
+    }
+    return { isValid, availableTeams };
+  }
+
+  getAvailableTeams(session: GameSession): string[] {
+    const teams: string[] = [];
+    session.teams.forEach((team, teamName) => {
+      if (team.players.size < session.teamSize) {
+        console.log('ADDED: ', teamName);
+
+        teams.push(teamName);
+      }
+    });
+
+    return teams;
+  }
+
   getSession(id: string): GameSession {
     return this.sessions.get(id);
   }

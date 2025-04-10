@@ -36,6 +36,20 @@ export class SocketService {
         teams: [...session.teams.keys()],
       });
     });
+
+    socket.on('checkCode', ({ gameId }: { gameId: string }) => {
+      const { isValid, availableTeams } = this.gameService.verifyCode(gameId);
+      console.log(availableTeams);
+
+      socket.emit('codeChecked', { gameId, isValid, availableTeams });
+    });
+
+    socket.on(
+      'requestJoinGame',
+      (payload: { gameId: string; name: string }) => {
+        console.log(payload);
+      },
+    );
   }
 
   // Add more methods for handling events, messages, etc.
