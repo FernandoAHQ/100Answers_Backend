@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { GameService } from 'src/services/GameService';
+import { serializeTeams } from 'src/utils/serialization';
 
 @Injectable()
 export class SocketService {
@@ -46,8 +47,22 @@ export class SocketService {
 
     socket.on(
       'requestJoinGame',
-      (payload: { gameId: string; name: string }) => {
-        console.log(payload);
+      (payload: { gameId: string; name: string; team: string }) => {
+        const teams = serializeTeams(this.gameService.joinPlayer(payload));
+
+        socket.join(`${payload.gameId}_PLAYERS`);
+
+        this.server
+          .to(`${payload.gameId}_HOST`)
+          .emit('playerJoined', { teams });
+
+        this.server
+          .to(`${payload.gameId}_MONITORS`)
+          .emit('playerJoined', { teams });
+
+        socket.to(`${payload.gameId}_PLAYERS`).emit('playerJoined', { teams });
+
+        socket.emit('joinedGame', { isAccepted: true, teams });
       },
     );
   }
