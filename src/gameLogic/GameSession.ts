@@ -14,7 +14,7 @@ enum RoundMoment {
 }
 
 export interface Team {
-  players: Set<string>; //id, name
+  players: Map<string, string>; //id, name
   points: number;
 }
 
@@ -36,11 +36,11 @@ export class GameSession {
     this.id = sessionId;
     this.teams
       .set(team1, {
-        players: new Set<string>(),
+        players: new Map<string, string>(),
         points: 0,
       })
       .set(team2, {
-        players: new Set<string>(),
+        players: new Map<string, string>(),
         points: 0,
       });
     this.teamSize = teamSize;
@@ -49,7 +49,11 @@ export class GameSession {
     console.log('NEW GAME SESSION CREATED', this.id);
   }
 
-  addPlayerToTeam(player: string, team: string) {
-    this.teams.get(team)?.players.add(player);
+  startGame() {
+    this.state = GameState.PLAYING;
+  }
+
+  addPlayerToTeam(socketId: string, player: string, team: string) {
+    this.teams.get(team)?.players.set(player, socketId);
   }
 }

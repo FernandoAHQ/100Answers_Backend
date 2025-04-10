@@ -48,7 +48,9 @@ export class SocketService {
     socket.on(
       'requestJoinGame',
       (payload: { gameId: string; name: string; team: string }) => {
-        const teams = serializeTeams(this.gameService.joinPlayer(payload));
+        const teams = serializeTeams(
+          this.gameService.joinPlayer(clientId, payload),
+        );
 
         socket.join(`${payload.gameId}_PLAYERS`);
 
@@ -65,6 +67,36 @@ export class SocketService {
         socket.emit('joinedGame', { isAccepted: true, teams });
       },
     );
+
+    socket.on('requestJoinMonitor', ({ gameId }: { gameId: string }) => {
+      const session = this.gameService.getSession(gameId);
+      if (!session) return socket.emit('joinedMonitor', { isAccepted: false });
+
+      const teams = serializeTeams(session.teams);
+
+      socket.join(`${gameId}_MONITORS`);
+
+      socket.emit('joinedMonitor', {
+        isAccepted: true,
+        gameState: { ...session, teams },
+      });
+    });
+
+    socket.on('startGame', (payload: { gameId: string }) => {
+      const session = this.gameService.startGame(payload.gameId);
+
+      this.server
+        .to(`${payload.gameId}_HOST`)
+        .emit('gameStarted', { gameState: session });
+
+      this.server
+        .to(`${payload.gameId}_MONITORS`)
+        .emit('gameStarted', { gameState: session });
+
+      socket
+        .to(`${payload.gameId}_PLAYERS`)
+        .emit('gameStarted', { gameState: session });
+    });
   }
 
   // Add more methods for handling events, messages, etc.

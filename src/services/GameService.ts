@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { GameSession, Team } from 'src/gameLogic/GameSession';
 import { NewGameConfig } from 'src/gameLogic/types';
+import { QuestionService } from 'src/question/question.service';
 
 @Injectable()
 export class GameService {
   private sessions = new Map<string, GameSession>();
   private gameCodes = new Set<string>();
+
+  constructor(private readonly questionService: QuestionService) {}
 
   getSession(id: string): GameSession {
     return this.sessions.get(id);
@@ -61,21 +64,35 @@ export class GameService {
     return teams;
   }
 
-  joinPlayer(payload: {
-    gameId: string;
-    name: string;
-    team: string;
-  }): Map<string, Team> {
+  joinPlayer(
+    socketId: string,
+    payload: {
+      gameId: string;
+      name: string;
+      team: string;
+    },
+  ): Map<string, Team> {
     console.log(payload);
     const { gameId, name, team } = payload;
     const session = this.sessions.get(gameId);
 
     if (session) {
-      session.addPlayerToTeam(name, team);
+      session.addPlayerToTeam(socketId, name, team);
       console.log(`Player ${name} joined team ${team} in session ${gameId}`);
     } else {
       console.log(`Session ${gameId} does not exist`);
     }
     return this.sessions.get(gameId).teams;
+  }
+
+  startGame(gameId: string): GameSession {
+    const session = this.sessions.get(gameId);
+    if (session) {
+      session.startGame();
+      return session;
+    } else {
+      console.log(`Session ${gameId} does not exist`);
+      return null;
+    }
   }
 }
